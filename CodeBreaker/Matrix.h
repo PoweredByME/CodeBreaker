@@ -1,10 +1,81 @@
-﻿using namespace std;
+#include <string>
+#include <iostream>
+using namespace std;
 
 class Matrix
 {
    private:
    double **mat;
    int rows, columns;
+   void swap(string roworcolumn, int row1, int row2)
+   {
+	   if (roworcolumn == "row")
+	   {
+		   if (row1 > rows || row1 < 0 || row2 > rows || row2 < 0)
+		   {
+			   cout << "Sorry ,swap not possible" << endl;
+			   return;
+		   }
+		   int column = this->columns;
+		   double * temp = new double;
+		   for (int i = 0; i<column; i++)
+		   {
+			   *temp = mat[row1 - 1][i];
+			   mat[row1 - 1][i] = mat[row2 - 1][i];
+			   mat[row2 - 1][i] = *temp;
+		   }
+		   delete temp;
+	   }
+	   else {
+		   if (row1 > columns || row1 < 0 || row2 > columns || row2<0)
+		   {
+			   cout << "Sorry, swap not possible" << endl;
+			   return;
+		   }
+		   double *temp = new double;
+		   int row = this->getRows();
+		   for (int i = 0; i<row; i++)
+		   {
+			   *temp = mat[i][row1 - 1];
+			   mat[i][row1 - 1] = mat[i][row2 - 1];
+			   mat[i][row2 - 1] = *temp;
+		   }
+		   delete temp;
+	   }
+   }
+   void rowaddition(int row1, int row2, int factor)
+   {
+	   for (int i = 0; i < columns; i++)
+	   {
+		   mat[row2][i] += factor*(mat[row1][i]);
+	   }
+   }
+   void columnaddition(int column1, int column2, double factor)
+   {
+	   for (int i = 0; i < rows; i++)
+	   {
+		   mat[i][column2] += factor*(mat[i][column1]);
+	   }
+   }
+   void divisionofrows(double factor, int rownum)
+   {
+	   if (factor == 0)
+		   return;
+	   for (int i = 0; i < columns; i++)
+	   {
+		   mat[rownum][i] /= factor;
+	   }
+   }
+   void divisionofcolumns(double factor, int colnum)
+   {
+	   if (factor == 0)
+		   return;
+	   for (int i = 0; i < rows; i++)
+	   {
+		   mat[i][colnum] /= factor;
+	   }
+   }
+
 
    Matrix addMatrix(const Matrix& obj)  const
    { 
@@ -220,10 +291,78 @@ class Matrix
    {
       return (this->Multiplication(rhs));
    }
+   void GaussElimination()
+   {
+	   int j, i;
+	   bool calculation = 0;
+	   for (j = 0; j < columns; j++)
+	   {
+		   for (i = 0; i < rows; i++)
+		   {
+			   if (mat[i][j] == 0)continue;
+			   calculation = 1;
+			   divisionofrows(mat[i][j], i);
+			   for (int k = i + 1; k < rows; k++)
+			   {
+				   rowaddition(i, k, -1 * mat[k][j]);
+				   mat[k][j] = 0;
+			   }
+			   swap("row", 1, i + 1);
+			   int h = 1;
+			   for (j = j + 1; j < columns; j++, h++)
+			   {
+				   for (i = h; i < rows; i++)
+				   {
+					   if (mat[i][j] == 0)continue;
+					   divisionofrows(mat[i][j], i);
+					   for (int k = i + 1; k < rows; k++)
+					   {
+						   rowaddition(i, k, -1 * mat[k][j]);
+						   mat[k][j] = 0;
+					   }
+					   swap("row", h + 1, i + 1);
+				   }
+			   }
+		   }
+	   }
 
-
+   }
+   void Gaussjordan()
+   {
+	   int j, i;
+	   bool calculation = 0;
+	   for (j = 0; j < columns; j++)
+	   {
+		   for (i = 0; i < rows; i++)
+		   {
+			   if (mat[i][j] == 0)continue;
+			   calculation = 1;
+			   divisionofrows(mat[i][j], i);
+			   for (int k = i+1; k < rows; k++)
+			   {
+				   rowaddition(i, k, -1*mat[k][j]);
+				   mat[k][j] = 0;
+			   }
+			   swap("row", 1, i + 1);
+			   int h = 1;
+			   for ( j = j + 1; j < columns; j++, h++)
+			   {
+				   for ( i = h; i < rows; i++)
+				   {
+					   if (mat[i][j] == 0)continue;
+					   divisionofrows(mat[i][j], i);
+					   for (int k = 0; k < rows; k++)
+					   {
+						   if (k == i)continue;
+						   rowaddition(i, k, -1 * mat[k][j]);
+						   mat[k][j] = 0;
+					   }
+					   swap("row", h + 1, i + 1);
+				   }
+			   }
+			   return;
+		   }
+	   }
+	   
+   }
 };
-
-
-
-
