@@ -1,5 +1,8 @@
 #include <string>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 using namespace std;
 
 class Matrix
@@ -7,10 +10,8 @@ class Matrix
    private:
    double **mat;
    int rows, columns;
-   void swap(string roworcolumn, int row1, int row2)
+   void swap(int row1, int row2)
    {
-	   if (roworcolumn == "row")
-	   {
 		   if (row1 > rows || row1 < 0 || row2 > rows || row2 < 0)
 		   {
 			   cout << "Sorry ,swap not possible" << endl;
@@ -25,23 +26,6 @@ class Matrix
 			   mat[row2 - 1][i] = *temp;
 		   }
 		   delete temp;
-	   }
-	   else {
-		   if (row1 > columns || row1 < 0 || row2 > columns || row2<0)
-		   {
-			   cout << "Sorry, swap not possible" << endl;
-			   return;
-		   }
-		   double *temp = new double;
-		   int row = this->getRows();
-		   for (int i = 0; i<row; i++)
-		   {
-			   *temp = mat[i][row1 - 1];
-			   mat[i][row1 - 1] = mat[i][row2 - 1];
-			   mat[i][row2 - 1] = *temp;
-		   }
-		   delete temp;
-	   }
    }
    void rowaddition(int row1, int row2, int factor)
    {
@@ -124,7 +108,8 @@ class Matrix
           int e = rhs.rows*this->columns;
           int count = 0;
           for(int c = 0; c < this->rows ; c++)
-          {https://www.youtube.com/watch?v=rpMrRYgXAMM
+          {
+		  //https://www.youtube.com/watch?v=rpMrRYgXAMM
              for(int c1 = 0 ; c1 < rhs.columns ; c1++)
              {
                  this->mat[c][c1]==rhs.mat[c][c1]?count++:0;
@@ -203,7 +188,50 @@ class Matrix
           }
      }
    }
-
+   Matrix(string random, int rows, int columns) : rows(rows), columns(columns)
+   {
+	   if (random == "random")
+	   {
+		   mat = new double*[rows];
+		   for (int i = 0; i < this->rows; i++)
+		   {
+			   mat[i] = new double[this->columns];
+			   for (int j = 0; j < this->columns; j++)
+			   {
+				   mat[i][j] = rand();
+			   }
+		   }
+	   }
+	   else if (random == "identity")
+	   {
+		   if (rows != columns)
+		   {
+			   cout << "Identity Matrix is only a square one" << endl;
+			   cout << "Making a pseudoidentity matrix" << endl;
+		   }
+		   mat = new double *[rows];
+		   for (int i = 0; i < this->rows; i++)
+		   {
+			   mat[i] = new double[this->columns];
+			   for (int j = 0; j < this->columns; j++)
+			   {
+				   if (i == j)
+					   mat[i][j] = 1;
+				   else mat[i][j] = 0;
+			   }
+		   }
+	   }
+   }
+   void randomize()
+   {
+	   for (int i = 0; i < this->rows; i++)
+	   {
+		   for (int j = 0; j < this->columns; j++)
+		   {
+			   mat[i][j] = rand();
+		   }
+	   }
+   }
    ~Matrix()
    {
         for(int c=0;c<this->rows; c++)
@@ -307,7 +335,7 @@ class Matrix
 				   rowaddition(i, k, -1 * mat[k][j]);
 				   mat[k][j] = 0;
 			   }
-			   swap("row", 1, i + 1);
+			   swap(1, i + 1);
 			   int h = 1;
 			   for (j = j + 1; j < columns; j++, h++)
 			   {
@@ -320,7 +348,7 @@ class Matrix
 						   rowaddition(i, k, -1 * mat[k][j]);
 						   mat[k][j] = 0;
 					   }
-					   swap("row", h + 1, i + 1);
+					   swap(h + 1, i + 1);
 				   }
 			   }
 		   }
@@ -343,7 +371,7 @@ class Matrix
 				   rowaddition(i, k, -1*mat[k][j]);
 				   mat[k][j] = 0;
 			   }
-			   swap("row", 1, i + 1);
+			   swap(1, i + 1);
 			   int h = 1;
 			   for ( j = j + 1; j < columns; j++, h++)
 			   {
@@ -357,12 +385,137 @@ class Matrix
 						   rowaddition(i, k, -1 * mat[k][j]);
 						   mat[k][j] = 0;
 					   }
-					   swap("row", h + 1, i + 1);
+					   swap(h + 1, i + 1);
 				   }
 			   }
 			   return;
 		   }
 	   }
 	   
+   }
+   void equationsolver()
+   {
+	   int variables;
+	   cout << "Enter the number of variables: ";
+	   cin >> variables;
+	   Matrix m(variables, variables + 1);
+	   double b;
+	   for (int i = 0; i < variables; i++)
+	   {
+		   for (int j = 0; j < variables; j++)
+		   {
+			   cout << "Please enter a" << i << " for equation " << j << endl;
+			   cin >> b;
+			   m.mat[i][j]=b;
+		   }
+	   }
+	   for (int i = 0; i < variables; i++)
+	   {
+		   cout << "Please enter the values of equations " << i + 1 << endl;
+		   cin >> b;
+		   m.mat[i][variables]=b;
+	   }
+	   m.Gaussjordan();
+	   bool clear = 0;
+	   for (int j = 0; j < variables; j++)
+	   {
+		   for (int i = 0; i < variables; i++)
+		   {
+			   if (m.mat[i][j] == 1)
+			   {
+				   clear = 1;
+				   i = variables;
+			   }
+		   }
+		   if (clear == 0)
+		   {
+			   cout << "The equation cannot be solved" << endl;
+			   return;
+		   }
+	   }
+	   for (int i = 0; i < variables; i++)
+	   {
+		   cout << "Variable number " << i << " is " << m.getElement(i, variables) << endl;
+	   }
+   }
+   void quadraticsolver()
+   {
+	   double a, b, c, i;
+	   cout << "Enter the coefficient of x^2: ";
+	   cin >> a;
+	   cout << "Enter the coefficient of x: ";
+	   cin >> b;
+	   cout << "Enter the coefficient of 1: ";
+	   cin >> c;
+	   i = b*b - 4 * a*c;
+	   if (i == 0)
+	   {
+		   cout << "The roots are identical and have value: " << -0.5*b / a << endl;
+	   }
+	   else if (i > 0)
+	   {
+		   cout << "The roots are " << (-0.5*b + 0.5*sqrt(i)) / a << " and " << (-0.5*b - 0.5*sqrt(i)) / a << endl;
+	   }
+	   else
+	   {
+		   cout << "The roots are imaginary" << endl;
+		   cout << "They are " << (-0.5*b) / a << " + " << 0.5*sqrt(-i) / a << "i and " << -0.5*b / a << " - " << 0.5*sqrt(-i) / a << "i" << endl;
+	   }
+   }
+   double determinant()
+   {
+	   if (rows != columns)
+	   {
+		   cout << "Determinant can only be taken for square matrices" << endl;
+		   cout << "Returning zero" << endl;
+		   return 0;
+	   }
+	   double multiplier = 1;
+	   bool valuerow = 0;
+		   for (int i = 0; i < rows; i++)
+		   {
+			   if (mat[i][0] == 0)continue;
+			   valuerow = 1;
+			   multiplier *= mat[i][0];
+			   divisionofrows(mat[i][0], i);
+			   for (int j = i + 1; j < rows; j++)
+			   {
+				   rowaddition(i, j, -1 * mat[j][0]);
+			   }
+			   if (i != 0)
+			   {
+				   swap(i, 0);
+				   multiplier *= -1;
+			   }
+			   if (rows == 3)
+			   {
+				   return (multiplier*(mat[rows - 2][rows - 2] * mat[rows - 1][rows - 1] - mat[rows - 1][rows - 2] * mat[rows - 2][rows - 1]));
+			   }
+			   Matrix m(rows-1,rows-1);
+			   for (int c = 0; c < rows-1; c++)
+			   {
+				   for (int c1 = 0; c1 < rows-1; c1++)
+				   {
+					   m.mat[c][c1] = mat[c + 1][c1 + 1];
+				   }
+			   }
+			   m.determinant();
+		   }
+		   if (valuerow == 0)return 0;
+   }
+   void eigenvalues()
+   {
+	   if (rows == 2 )
+	   {
+		   double b, c;
+		   b = -(mat[0][0] + mat[1][1]);
+		   c = this->determinant();
+		   if (b*b > 4 * c)
+			   cout << "The Eigenvalues are " << (-b + sqrt(b*b - 4 * c)) / 2 << " and " << (-b + sqrt(b*b - 4 * c)) / 2 << endl;
+		   else if (b*b == 4 * c)
+			   cout << "The (identical) Eigenvalues are " << -b / 2 << endl;
+		   else cout << "The imaginary Eigenvalues " << -b / 2 << " + " << 0.5*sqrt(4 * c - b*b) << "i" << endl << -b / 2 << " - " << 0.5*sqrt(4 * c - b*b) << "i" << endl;
+	   }
+
    }
 };
