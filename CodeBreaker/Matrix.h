@@ -699,6 +699,8 @@ public:
 	void magic(int x)
 	{
 		if (x % 2== 1)
+			//  for magic matrices having odd rows
+			// I have no idea how this works
 		{
 			bool donefor = false;
 			int r = 0;
@@ -730,7 +732,7 @@ public:
 				donefor = 0;
 			}
 		}
-		else if (x % 4 == 0)
+		else if (x % 4 == 0)// for matrices having number of rows divisible by 4
 		{
 			int k = 1;
 			this->resize(x, x);
@@ -768,7 +770,7 @@ public:
 				}
 			}
 		}
-		else
+		else // for magic matrices for number of even rows not divisible by 4
 		{
 			this->resize(x, x);
 			if (x == 2)
@@ -826,14 +828,14 @@ public:
 	Matrix getInverse()
 	{
 		double det = determinant();
-		if (det == 0)
+		if (det == 0)// checking for singularity
 		{
 			cout << "Inverse not possible" << endl;
 			return (*this);
 		}
-		Matrix temp1(rows, rows), temp2("identity",rows, rows);
-		Matrix Big;
-		for (int i = 0; i < rows; i++)
+		Matrix temp1(rows, rows), temp2("identity",rows, rows);//  making temporary copy of matrix for processing
+		Matrix Big;// for appending identity matrices to matrix for finding inverse
+		for (int i = 0; i < rows; i++)//  copying matrix to temporary matrix
 		{
 			for (int j = 0; j < rows; j++)
 			{
@@ -841,10 +843,11 @@ public:
 			}
 		}
 		Big.Matrixbuilder(temp1, temp2);
-		Big.Gaussjordan();
+		// appending complete
+		Big.Gaussjordan();// applying gaussjordan to get inverse
 		for (int i = 0; i < rows; i++)
 		{
-			for (int j = rows; j < 2*rows; j++)
+			for (int j = rows; j < 2*rows; j++)//  getting inverse
 			{
 				temp1.mat[i][j-rows] = Big.mat[i][j];
 			}
